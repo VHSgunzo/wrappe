@@ -34,14 +34,12 @@ members = [
 
 [profile.release]
 
-codegen-units = 1
-debug = false
-debug-assertions = false
-incremental = false
-lto = "fat"
-opt-level = 's'
+lto = true
 panic = "abort"
+opt-level = "z"
 strip = "symbols"
+debug  = false
+codegen-units = 1
 
 [profile.dev]
 
