@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - action
+    tags:
+    - '*'
+  workflow_dispatch:
+
+jobs:
+  build_and_release:
+    name: wrappe
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install deps
+        run: |
+          sudo bash -c 'apt update && apt install upx binutils qemu-user-static -y'
+
+      - name: Build x86_64
+        run: |
+          docker run --rm -v "${{ github.workspace }}":/app -w /app -v "$HOME/.cargo/registry":/root/.cargo/registry -v "$HOME/.cargo/git":/root/.cargo/git --user $(id -u):$(id -g) --platform=linux/amd64 vhsgunzo/rust-alpine-mimalloc:v2.1.7 sh -c 'cargo clean ; cargo build --release --target $(uname -m)-unknown-linux-musl'
+          mv target/x86_64-unknown-linux-musl/release/wrappe wrappe-x86_64
+
+      - name: Build aarch64
+        run: |
+          docker run --rm -v "${{ github.workspace }}":/app -w /app -v "$HOME/.cargo/registry":/root/.cargo/registry -v "$HOME/.cargo/git":/root/.cargo/git --user $(id -u):$(id -g) --platform=linux/amd64 vhsgunzo/rust-alpine-mimalloc:v2.1.7 sh -c 'cargo clean ; cargo build --release --target $(uname -m)-unknown-linux-musl'
+          mv target/aarch64-unknown-linux-musl/release/wrappe wrappe-aarch64
+
+      # https://github.com/aunali1/super-strip
+      - name: Strip
+        run: |
+          "${{ github.workspace }}/.github/sstrip" wrappe-*
+
+      - name: UPX
+        run: |
+          ls wrappe-*|xargs -I {} upx -9 --best {} -o {}-upx
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: wrappe*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
