@@ -21,6 +21,8 @@ jobs:
       - name: Install deps
         run: |
           sudo bash -c 'apt update && apt install upx binutils qemu-user-static -y'
+          mkdir -p "$HOME/.cargo/git"
+          mkdir -p "$HOME/.cargo/registry"
 
       - name: Build x86_64
         run: |
