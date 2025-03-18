@@ -31,7 +31,7 @@ jobs:
 
       - name: Build aarch64
         run: |
-          docker run --rm -v "${{ github.workspace }}":/app -w /app -v "$HOME/.cargo/registry":/root/.cargo/registry -v "$HOME/.cargo/git":/root/.cargo/git --user $(id -u):$(id -g) --platform=linux/amd64 vhsgunzo/rust-alpine-mimalloc:v2.1.7 sh -c 'cargo clean ; cargo build --release --target $(uname -m)-unknown-linux-musl'
+          docker run --rm -v "${{ github.workspace }}":/app -w /app -v "$HOME/.cargo/registry":/root/.cargo/registry -v "$HOME/.cargo/git":/root/.cargo/git --user $(id -u):$(id -g) --platform=linux/arm64 vhsgunzo/rust-alpine-mimalloc:v2.1.7 sh -c 'cargo clean ; cargo build --release --target $(uname -m)-unknown-linux-musl'
           mv target/aarch64-unknown-linux-musl/release/wrappe wrappe-aarch64
 
       # https://github.com/aunali1/super-strip
